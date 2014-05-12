@@ -1,0 +1,5 @@
+sudo npm install jasmine-node -g
+
+jasmine-node specs
+
+it's that easy!

@@ -2,6 +2,9 @@
 logs
 *.log
 
+# Key Files!
+*.key
+
 # Runtime data
 pids
 *.pid
