@@ -1,6 +1,14 @@
-var stripe = require('stripe')("sk_test_vN8woKr8lcugU3LfYsuFWR7Q"),
+var privateKey, fs = require('fs'), path = require('path');
+fs.readFile(path.join(__dirname + '/../../stripe.key'),'utf8', function(err, data) {
+  if (err) { logger.error(JSON.stringify(err)); }
+  logger.info('stripe key');
+  privateKey = data;
+});
+
+var stripe = require('stripe')('sk_test_vN8woKr8lcugU3LfYsuFWR7Q'),
     orders = require('./orders'),
-    sendfax = require('./sendfax');
+    sendfax = require('./sendfax'),
+    logger = require('../log');
 
 
 exports.chargeCard = function(req, res) {
@@ -13,14 +21,17 @@ exports.chargeCard = function(req, res) {
      card: stripeToken
    }, function(err, charge) {
       if (err) {
-        console.log('ERROR charging card with id ' + req.body.id + '  user ' + req.card.name + ' address ' + req.card.address_city + ' -->Error Message:  ' + err.message);
-        orders.addError(error, res);
-        res.status(500).send('Credit Card declined');
+        logger.error('ERROR charging card with id ' + JSON.stringify(err));
+        res.writeHead(500);
+        res.end("Error Processing Credit Card");
       }
-      orders.addCharge(charge, res);
+      logger.info("Charge was a success for " + charge.id + " " +req.body.card.name);
+      orders.addCharge(charge);
       sendfax.sendFax(null, {'orderId':charge.id, 'email':req.body.email, 'creditCard':charge.card.last4,
         'cardCount': req.body.order.items.length, 'totalAmount': charge.amount/100, 'cardAmount':req.body.order.totalCharge/100,
         'orders':req.body.order.items, 'name':req.body.card.name})
-      res.status(200).send(charge);
+      res.setHeader('Content-Type', 'application/json');
+      res.writeHead(200)
+      res.end(JSON.stringify(charge));
   });
 };
