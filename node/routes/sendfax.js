@@ -1,6 +1,7 @@
 var fs = require('fs'),
     path = require('path'),
-    logger = require('../log');
+    logger = require('../log'), 
+    mailer = require('../mailreceipt');
 
 logger.info('fax api spinning up')
 
@@ -8,19 +9,19 @@ var privateKey, publicKey;
 fs.readFile(path.join(__dirname + '/../../phaxiopublic.key'),'utf8', function(err, data) {
   if (err) { logger.error(err); }
   logger.info('phaxio public key' + data);
-  publickey = data;
+  publicKey = data;
 });
 fs.readFile(path.join(__dirname + '/../../phaxioprivate.key'),'utf8', function(err, data) {
   if (err) { logger.error(err); }
   logger.info('private phaxio key read');
-  privatekey = data;
-})
-
+  privateKey = data;
+});
 
 exports.sendFax = function(pdfPath, meta) {
 
+  logger.info('okay does it make it here');
   var Phaxio = require('phaxio'),
-      phaxio = new Phaxio('a678795e996a164e5937e652d83d9f499e7a8de7', '5027b57e8520e53372343c980d63305f71eeadb8',
+      phaxio = new Phaxio(publicKey, privateKey,
           function(err, data) {
             logger.info(data);
             if (err) {
@@ -42,13 +43,9 @@ exports.sendFax = function(pdfPath, meta) {
   }, function(err, data) {
     if (err) {
       logger.error('whoa theres a problem ' + JSON.stringify(err));
+      mailer.sendError(JSON.stringify(orderString, err));
     } else if (!data.success) {
-      logger.info('hmmm....something didnt seem to work... no success' + data.message);
+      logger.error('hmmm....error sending fax ' + JSON.stringify(err));;
     }
-    if (data.data.is_test) {
-      logger.info('Dont worry this is just a test... Repeat just a test');
-    }
-
-    logger.info(data.message + ' for ' + data.data.faxId);
   });
 }
