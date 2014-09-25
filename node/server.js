@@ -7,6 +7,7 @@ var express = require('express'),
     childProcess = require('child_process'),
     sleep = require('sleep'),
     stripe = require('./routes/stripe'),
+    cash = require('./routes/cash'),
     orders = require('./routes/orders'),
     logger = require('./log'),
     io = require('./routes/socketstuff');
@@ -24,6 +25,9 @@ app.get('/orders/:id', orders.findById);
 app.delete('/orders/:id', orders.deleteOrder);
 app.post('/orders', function(req, res) {
  stripe.chargeCard(req, res);
+});
+app.post('/cashorders', function(req, res) {
+ cash.recordOrder(req, res);
 });
 
 logger.info('starting up server');
