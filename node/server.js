@@ -9,8 +9,7 @@ var express = require('express'),
     stripe = require('./routes/stripe'),
     cash = require('./routes/cash'),
     orders = require('./routes/orders'),
-    logger = require('./log'),
-    io = require('./routes/socketstuff');
+    logger = require('./log');
 
 var app = express();
 app.use(bodyParser());

@@ -22,6 +22,7 @@ RUN mkdir /var/run/sshd
 RUN echo 'root:welcome' |chpasswd
 
 EXPOSE 22
+EXPOSE 8020
 
 # supervisor configuration
 ADD docker/policy-rc.d /usr/sbin/policy-rc.d
